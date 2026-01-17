@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Benjamin's Work - Parts of Speech Game</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #6dd5ed, #2193b0);
+  margin: 0;
+  padding: 0;
+}
+.container {
+  max-width: 750px;
+  margin: 40px auto;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+h1 {
+  text-align: center;
+  color: #2193b0;
+}
+.instructions {
+  background: #f0f8ff;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+.question {
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+.answers button {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #e3e3e3;
+}
+.answers button:hover {
+  background: #cce7f0;
+}
+#feedback {
+  margin-top: 15px;
+  font-weight: bold;
+}
+#score {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 18px;
+}
+.progress-bar {
+  background: #e0e0e0;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.progress {
+  height: 18px;
+  width: 0%;
+  background: #2193b0;
+  text-align: center;
+  color: white;
+  font-size: 12px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Benjamin's Work</h1>
+
+  <div class="instructions">
+    <strong>Instructions:</strong>
+    <ul>
+      <li>You will answer 15 questions.</li>
+      <li>The game saves your progress automatically.</li>
+      <li>If you refresh or close the page, you can continue later.</li>
+      <li>Your score appears at the end.</li>
+    </ul>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress" id="progress">0%</div>
+  </div>
+
+  <div id="game">
+    <div class="question" id="question"></div>
+    <div class="answers" id="answers"></div>
+    <div id="feedback"></div>
+  </div>
+
+  <div id="score"></div>
+</div>
+
+<script>
+const questions = [
+  {q: "What part of speech is the word 'run' in: I like to run every day.", a: "Verb", options: ["Noun","Verb","Adjective","Adverb"]},
+  {q: "What part of speech is the word 'happy'?", a: "Adjective", options: ["Noun","Verb","Adjective","Preposition"]},
+  {q: "What part of speech is the word 'quickly'?", a: "Adverb", options: ["Adverb","Noun","Verb","Pronoun"]},
+  {q: "What part of speech is the word 'dog'?", a: "Noun", options: ["Verb","Adjective","Noun","Conjunction"]},
+  {q: "What part of speech is the word 'and'?", a: "Conjunction", options: ["Preposition","Conjunction","Verb","Noun"]},
+  {q: "What part of speech is the word 'she'?", a: "Pronoun", options: ["Noun","Pronoun","Adjective","Verb"]},
+  {q: "What part of speech is the word 'under'?", a: "Preposition", options: ["Adverb","Preposition","Noun","Verb"]},
+  {q: "What part of speech is the word 'wow'?", a: "Interjection", options: ["Noun","Verb","Interjection","Conjunction"]},
+  {q: "What part of speech is the word 'blue' in blue sky?", a: "Adjective", options: ["Verb","Noun","Adjective","Adverb"]},
+  {q: "What part of speech is the word 'eat'?", a: "Verb", options: ["Verb","Noun","Adjective","Preposition"]},
+  {q: "What part of speech is the word 'slowly'?", a: "Adverb", options: ["Noun","Verb","Adverb","Conjunction"]},
+  {q: "What part of speech is the word 'book' in: I read a book.", a: "Noun", options: ["Verb","Adverb","Noun","Pronoun"]},
+  {q: "What part of speech is the word 'because'?", a: "Conjunction", options: ["Noun","Verb","Conjunction","Interjection"]},
+  {q: "What part of speech is the word 'they'?", a: "Pronoun", options: ["Pronoun","Noun","Adjective","Verb"]},
+  {q: "What part of speech is the word 'on'?", a: "Preposition", options: ["Preposition","Verb","Noun","Adjective"]}
+];
+
+let current = parseInt(localStorage.getItem("current")) || 0;
+let score = parseInt(localStorage.getItem("score")) || 0;
+
+function updateProgress() {
+  const percent = Math.round((current / questions.length) * 100);
+  const bar = document.getElementById("progress");
+  bar.style.width = percent + "%";
+  bar.innerText = percent + "%";
+}
+
+function loadQuestion() {
+  updateProgress();
+  document.getElementById("feedback").innerHTML = "";
+
+  if (current < questions.length) {
+    const q = questions[current];
+    document.getElementById("question").innerText = (current + 1) + ". " + q.q;
+    const answersDiv = document.getElementById("answers");
+    answersDiv.innerHTML = "";
+
+    q.options.forEach(option => {
+      const btn = document.createElement("button");
+      btn.innerText = option;
+      btn.onclick = () => checkAnswer(option);
+      answersDiv.appendChild(btn);
+    });
+  } else {
+    endGame();
+  }
+}
+
+function checkAnswer(selected) {
+  const correct = questions[current].a;
+  if (selected === correct) {
+    score++;
+    document.getElementById("feedback").innerText = "Correct!";
+  } else {
+    document.getElementById("feedback").innerText = "Wrong! The correct answer is " + correct + ".";
+  }
+
+  current++;
+  localStorage.setItem("current", current);
+  localStorage.setItem("score", score);
+
+  setTimeout(loadQuestion, 800);
+}
+
+function endGame() {
+  document.getElementById("game").style.display = "none";
+  document.getElementById("score").innerHTML =
+    "Game Over!<br>Your score: " + score + " / " + questions.length +
+    "<br><br><button onclick='resetGame()'>Restart Game</button>";
+  updateProgress();
+}
+
+function resetGame() {
+  localStorage.clear();
+  location.reload();
+}
+
+loadQuestion();
+</script>
+</body>
+</html>
